@@ -1,0 +1,8 @@
+{
+	"ApiKey" : "3082ed5233",
+	"ServerUrl" : "https://localhost:7126",
+	"LatestScoreSettings" : {
+		"IncludeOtherMachines" : true,
+		"GetLatestOrTopScores" : true
+	}
+}
