@@ -1,0 +1,105 @@
+﻿'Output Score and 3 'Achievements' if they're reached:
+
+Dim JackpotGoal,ComboGoal,SJetsGoal
+JackpotGoal=False
+ComboGoal=False
+SJetsGoal=False
+
+Sub DetectGoals(VPMNVRAM)
+ Dim I,S
+
+ Dim NVRAM
+ NVRAM = Controller.NVRAM
+ TextBox4.text = "Score: "& ConvertBCD(NVRAM(CInt("&h16A0"))) & ConvertBCD(NVRAM(CInt("&h16A1"))) & ConvertBCD(NVRAM(CInt("&h16A2"))) & ConvertBCD(NVRAM(CInt("&h16A3"))) & ConvertBCD(NVRAM(CInt("&h16A4"))) & ConvertBCD(NVRAM(CInt("&h16A5")))
+
+ For I = 0 To UBound(VPMNVRAM)
+   If(VPMNVRAM(I,0) = CInt("&h1885")) Then 'actually 3byte integer: 1883, 1884 and 1885
+     JackpotGoal=False
+     ComboGoal=False
+     SJetsGoal=False
+     TextBox3.text = ""
+   End If
+
+   If((JackpotGoal = False) And (VPMNVRAM(I,0) = CInt("&h1A5F"))) Then 'actually 3byte integer: 1A5D, 1A5E and 1A5F
+     S = "Jackpot Goal" & Chr(13)
+     JackpotGoal = True
+     TextBox3.text = TextBox3.text & S
+   End If
+
+   If((ComboGoal = False) And (VPMNVRAM(I,0) = CInt("&h1A6B"))) Then 'actually 3byte integer: 1A69, 1A6A and 1A6B
+     S = "Combo Goal" & Chr(13)
+     ComboGoal = True
+     TextBox3.text = TextBox3.text & S
+   End If
+
+   If((SJetsGoal = False) And (VPMNVRAM(I,0) = CInt("&h1A89"))) Then 'actually 3byte integer: 1A87, 1A88 and 1A89
+     S = "Super Jets Goal" & Chr(13)
+     SJetsGoal = True
+     TextBox3.text = TextBox3.text & S
+   End If
+ Next
+End Sub
+
+Set NVRAMCallback = GetRef("DetectGoals")
+
+' And a second test that just fetches the Grand Champion
+
+Function ConvertBCD(v)
+  ConvertBCD = "" & ((v AND &hF0) / 16) & (v AND &hF)
+End Function
+
+Sub OutputGC
+ Dim NVRAM
+ NVRAM = Controller.NVRAM
+ TextBox2.text = "GC: " & Chr(NVRAM(CInt("&h1CAF"))) & Chr(NVRAM(CInt("&h1CB0"))) & Chr(NVRAM(CInt("&h1CB1"))) & " " & ConvertBCD(NVRAM(CInt("&h1CB2"))) & ConvertBCD(NVRAM(CInt("&h1CB3"))) & ConvertBCD(NVRAM(CInt("&h1CB4"))) & ConvertBCD(NVRAM(CInt("&h1CB5"))) & ConvertBCD(NVRAM(CInt("&h1CB6"))) & ConvertBCD(NVRAM(CInt("&h1CB7")))
+End Sub
+
+
+- New methods for the Controller object:
+HRESULT NVRAM(/*[out, retval]*/ VARIANT *pVal); - Get the full NVRAM of the emulation (e.g. high scores, settings, etc. as a binary blob of 8bit values)
+HRESULT ChangedNVRAM(/*[out, retval]*/ VARIANT *pVal); - Get only the NVRAM parts that have changed since last call (similar to ChangedLamps), 
+first dimension has the location, second the new value (only 8 bits are valid), third the previous value (only 8 bits are valid)
+
+=----------------------
+Const UseVPMNVRAM = true
+
+
+' at the beginning of the table to enable a dynamic callback (NVRAMCallback). 
+'Then to display some NVRAM stuff, for example the number of left flipper buttons pressed (for dm_h6):
+
+Sub OutputLeftFlipper(VPMNVRAM)
+ Dim I,S
+ For I = 0 To UBound(VPMNVRAM) 'go over all changed NVRAM locations
+   If(VPMNVRAM(I,0) = CInt("&h19FF")) Then 'position of left flipper counter, but actually its a 3byte integer at 19FD, 19FE and 19FF
+     S = "LeftFlipper: " & VPMNVRAM(I,0) & " : " & VPMNVRAM(I,1) & " (" & VPMNVRAM(I,2) & ")" & Chr(13) 'three dimensional array: location, new value, old value
+     TextBox1.text = S 'output to textbox
+   End If
+ Next
+End Sub
+
+-- or some static stuff (-can- be more costly to fetch, so called in table init for example), again for dm_h6, getting the Grand Champion initials and score:
+
+Set NVRAMCallback = GetRef("OutputLeftFlipper") 'attach above sub routine to the NVRAM callback
+
+
+Function ConvertBCD(v) 'converts an 8bit number in BCD format to string (for example 12 in hexadecimal format to "12")
+  ConvertBCD = "" & ((v AND &hF0) / 16) & (v AND &hF)
+End Function
+
+Sub OutputGC
+ Dim NVRAM
+ NVRAM = Controller.NVRAM 'read full NVRAM from VPM as array
+ TextBox2.text = "GC: " & Chr(NVRAM(CInt("&h1CAF"))) & Chr(NVRAM(CInt("&h1CB0"))) & Chr(NVRAM(CInt("&h1CB1"))) & " " & ConvertBCD(NVRAM(CInt("&h1CB2"))) & ConvertBCD(NVRAM(CInt("&h1CB3"))) & ConvertBCD(NVRAM(CInt("&h1CB4"))) & ConvertBCD(NVRAM(CInt("&h1CB5"))) & ConvertBCD(NVRAM(CInt("&h1CB6"))) & ConvertBCD(NVRAM(CInt("&h1CB7")))
+End Sub
+
+Robocop - End Game 7563
+Robocop Last Score - debug.print NVRAM(CInt("&h1A7")) & NVRAM(CInt("&h1A8")) & NVRAM(CInt("&h1A9")) & NVRAM(CInt("&h1AA")) & NVRAM(CInt("&h1AB")) & NVRAM(CInt("&h1AC")) & NVRAM(CInt("&h1AD"))
+
+Score 0000000
+7625
+Score 0000000
+7637
+Score 0000000
+7639
+Score 00000007485
+Score 0318080

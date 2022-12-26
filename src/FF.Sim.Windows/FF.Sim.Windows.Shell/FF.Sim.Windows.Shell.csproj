@@ -1,0 +1,31 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<OutputType>WinExe</OutputType>
+		<TargetFramework>net6.0-windows</TargetFramework>
+		<Nullable>enable</Nullable>
+		<UseWPF>true</UseWPF>
+		<PublishReadyToRun>true</PublishReadyToRun>
+		<Configuration>Release</Configuration>
+		<RuntimeIdentifier>win-x86</RuntimeIdentifier>
+		<ApplicationIcon>pingod.ico</ApplicationIcon>
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <Content Include="pingod.ico" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<TrimmerRootAssembly Include="System.IO.FileSystem" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\FF.Sim.Windows.Base\FF.Sim.Windows.Base.csproj" />
+		<ProjectReference Include="..\Modules\FF.Sim.Windows.Module\FF.Sim.Windows.Module.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="gong-wpf-dragdrop" Version="3.2.0" />
+	</ItemGroup>
+
+</Project>
